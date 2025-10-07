@@ -15,13 +15,29 @@ const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
 
 export const signup = async (req, res) => {
   try {
-    const { email, username, password } = req.body;
+    const { email, username, password, country, currency } = req.body;
 
     // Validate inputs
     if (!email || !username || !password) {
       return res.status(400).json({
         success: false,
         message: "Email, username, and password are required.",
+      });
+    }
+
+    // Validate country and currency
+    if (!country || !currency) {
+      return res.status(400).json({
+        success: false,
+        message: "Country and currency are required.",
+      });
+    }
+
+    // Validate currency format (should be 3 letter code like USD, EUR, INR)
+    if (currency.length !== 3) {
+      return res.status(400).json({
+        success: false,
+        message: "Currency must be a valid 3-letter code (e.g., USD, EUR, INR).",
       });
     }
 
@@ -54,6 +70,8 @@ export const signup = async (req, res) => {
       email,
       username,
       password: hasedPassword,
+      country,
+      currency: currency.toUpperCase(),
       level: 1,
       xp: 0,
       xpForNextLevel,
@@ -68,11 +86,13 @@ export const signup = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "User registered sucessfully.",
+      message: "User registered successfully.",
       user: {
         id: newUser._id,
         email: newUser.email,
         username: newUser.username,
+        country: newUser.country,
+        currency: newUser.currency,
       },
       token,
     });

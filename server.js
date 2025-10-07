@@ -7,6 +7,10 @@ import levelConfigRoutes from "./routes/levelConfig.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import cors from "cors";
 import adminRoutes from "./routes/admin.routes.js";
+import actionRoutes from "./routes/action.routes.js";
+import challengeRoutes from "./routes/challenge.routes.js";
+import userChallengeRoutes from "./routes/userChallenge.routes.js";
+
 
 
 
@@ -23,11 +27,15 @@ app.use(express.json());
 
 //Routes
 app.use("/api/user/auth", authRoutes);
+app.use("/api/user/my-challenges", userChallengeRoutes); // or whatever path you prefer
     //admin
     app.use("/api/admin/settings", settingsRoutes);
     app.use("/api/admin/levels", levelConfigRoutes);
     app.use("/api/admin/users", userRoutes);
     app.use("/api/admin", adminRoutes);
+    app.use("/api/admin/actions", actionRoutes);
+    app.use("/api/admin/challenges", challengeRoutes);
+
 
 
 // MongoDB connection

@@ -20,6 +20,17 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required "],
       minlength: [6, "Password must be at least 6 characters long"],
     },
+    country: {
+      type: String,
+      required: [true, "Country is required"],
+      trim: true,
+    },
+    currency: {
+      type: String,
+      required: [true, "Currency is required"],
+      trim: true,
+      uppercase: true,
+    },
 
     // ---------- Gamification fields ----------
     level: {
@@ -37,6 +48,25 @@ const userSchema = new mongoose.Schema(
       default: 100, // fallback default; will be overridden at signup from admin setting
       min: [1, "xpForNextLevel must be at least 1"],
     },
+    // inside your User schema definition, add:
+    completedChallenges: [
+      {
+        challenge: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Challenge",
+          required: true,
+        },
+        completedAt: {
+          type: Date,
+          default: () => new Date(),
+        },
+        xpReward: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
