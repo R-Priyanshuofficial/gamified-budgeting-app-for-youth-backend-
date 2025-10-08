@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
+    currencySymbol: {
+      type: String,
+      required: [true, "Currency symbol is required"],
+      trim: true,
+    },
 
     // ---------- Gamification fields ----------
     level: {

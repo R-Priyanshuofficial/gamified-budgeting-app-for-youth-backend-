@@ -101,3 +101,76 @@ export const getUserById = async (req, res) => {
     });
   }
 };
+
+/**
+ * GET /api/users/dashboard/:userId
+ * Get complete user data for dashboard display
+ */
+export const getUserDashboardData = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Fetch user with populated completed challenges
+    const user = await User.findById(userId)
+      .select('-password')
+      .populate({
+        path: 'completedChallenges.challenge',
+        select: 'challengeName challengeDescription xpReward'
+      });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Calculate dashboard statistics
+    const totalCompletedChallenges = user.completedChallenges.length;
+    const totalXpEarned = user.xp;
+    const currentLevel = user.level;
+    const xpForNextLevel = user.xpForNextLevel;
+    const xpProgress = ((user.xp % xpForNextLevel) / xpForNextLevel * 100).toFixed(2);
+
+    // Prepare dashboard response
+    const dashboardData = {
+      userInfo: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        country: user.country,
+        currency: user.currency,
+        currencySymbol: user.currencySymbol,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      },
+      gamificationStats: {
+        level: currentLevel,
+        xp: totalXpEarned,
+        xpForNextLevel: xpForNextLevel,
+        xpProgress: parseFloat(xpProgress),
+        totalCompletedChallenges: totalCompletedChallenges
+      },
+      completedChallenges: user.completedChallenges.map(cc => ({
+        challengeId: cc.challenge?._id,
+        challengeName: cc.challenge?.challengeName,
+        challengeDescription: cc.challenge?.challengeDescription,
+        xpReward: cc.xpReward,
+        completedAt: cc.completedAt
+      }))
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Dashboard data retrieved successfully",
+      data: dashboardData
+    });
+  } catch (err) {
+    console.error("getUserDashboardData error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch dashboard data",
+      error: err.message
+    });
+  }
+};

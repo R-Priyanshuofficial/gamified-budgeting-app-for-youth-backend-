@@ -15,7 +15,7 @@ const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
 
 export const signup = async (req, res) => {
   try {
-    const { email, username, password, country, currency } = req.body;
+    const { email, username, password, country, currency, currencySymbol } = req.body;
 
     // Validate inputs
     if (!email || !username || !password) {
@@ -25,11 +25,11 @@ export const signup = async (req, res) => {
       });
     }
 
-    // Validate country and currency
-    if (!country || !currency) {
+    // Validate country, currency, and currencySymbol
+    if (!country || !currency || !currencySymbol) {
       return res.status(400).json({
         success: false,
-        message: "Country and currency are required.",
+        message: "Country, currency, and currency symbol are required.",
       });
     }
 
@@ -72,6 +72,7 @@ export const signup = async (req, res) => {
       password: hasedPassword,
       country,
       currency: currency.toUpperCase(),
+      currencySymbol,
       level: 1,
       xp: 0,
       xpForNextLevel,
@@ -93,6 +94,7 @@ export const signup = async (req, res) => {
         username: newUser.username,
         country: newUser.country,
         currency: newUser.currency,
+        currencySymbol: newUser.currencySymbol,
       },
       token,
     });

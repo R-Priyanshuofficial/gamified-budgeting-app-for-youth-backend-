@@ -13,6 +13,13 @@
 ✅ XP properly carries over after level-ups
 ✅ Auto re-evaluation when level configs are updated
 
+### **Phase 3: Currency Symbol & Dashboard API (Latest Update)**
+✅ Added `currencySymbol` field to User schema for UI display
+✅ Updated signup process to require currency symbol
+✅ Created comprehensive dashboard API endpoint
+✅ Dashboard returns user info, gamification stats, and completed challenges
+✅ Calculates XP progress percentage for visual progress bars
+
 ---
 
 ## 📁 Files Created/Modified
@@ -98,6 +105,7 @@ Final: Level 4 with 100 XP
 - `GET /api/admin/users` - List all users
 - `GET /api/admin/users/:userId` - Get single user details
 - `POST /api/admin/users/:userId/add-xp` - Add XP to user (triggers auto level-up)
+- `GET /api/admin/users/dashboard/:userId` - Get complete dashboard data (NEW)
 
 ### **Settings (Admin)**
 - `GET /api/admin/settings` - Get system settings
@@ -167,9 +175,19 @@ Final: Level 4 with 100 XP
   email: String,
   username: String,
   password: String,
+  country: String,              // Required
+  currency: String,             // Required (3-letter code, uppercase)
+  currencySymbol: String,       // Required (e.g., $, €, ₹)
   level: Number (default: 1),
   xp: Number (default: 0),
-  xpForNextLevel: Number (default: 100)
+  xpForNextLevel: Number (default: 100),
+  completedChallenges: [        // Array of completed challenges
+    {
+      challenge: ObjectId (ref: Challenge),
+      completedAt: Date,
+      xpReward: Number
+    }
+  ]
 }
 ```
 

@@ -4,8 +4,9 @@
 
 ### **Update 1: User Schema Enhancement**
 ✅ Added `country` field for user location tracking
-✅ Added `currency` field for multi-currency support
-✅ Both fields required during signup with proper validation
+✅ Added `currency` field for multi-currency support (3-letter code)
+✅ Added `currencySymbol` field for displaying currency symbols (e.g., $, €, ₹)
+✅ All fields required during signup with proper validation
 
 ### **Update 2: Actions System**
 ✅ Create, read, update, delete actions
@@ -18,6 +19,12 @@
 ✅ Automatic level-up when completing challenges
 ✅ Track completed challenges per user
 ✅ Prevent duplicate challenge completions
+
+### **Update 4: Dashboard API**
+✅ New endpoint to fetch complete user data for dashboard
+✅ Includes user info, gamification stats, and completed challenges
+✅ Provides XP progress percentage for current level
+✅ Populates challenge details in completion history
 
 ---
 
@@ -56,6 +63,7 @@
   password: String,
   country: String,          // NEW - Required
   currency: String,         // NEW - Required (3-letter code, uppercase)
+  currencySymbol: String,   // NEW - Required (e.g., $, €, ₹)
   level: Number,
   xp: Number,
   xpForNextLevel: Number,
@@ -115,13 +123,14 @@ Register a new user with country and currency information.
   "username": "johndoe",
   "password": "password123",
   "country": "India",
-  "currency": "INR"
+  "currency": "INR",
+  "currencySymbol": "₹"
 }
 ```
 
 **Validations:**
 - Email, username, password are required
-- Country and currency are required
+- Country, currency, and currencySymbol are required
 - Currency must be a 3-letter code (e.g., USD, EUR, INR)
 - Username must be at least 3 characters
 - Password must be at least 6 characters
@@ -136,7 +145,8 @@ Register a new user with country and currency information.
     "email": "user@example.com",
     "username": "johndoe",
     "country": "India",
-    "currency": "INR"
+    "currency": "INR",
+    "currencySymbol": "₹"
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
@@ -611,6 +621,80 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
+## 5️⃣ User Dashboard API
+
+### **5.1 Get User Dashboard Data**
+Get complete user data for dashboard display including profile, gamification stats, and completed challenges.
+
+**Endpoint:** `GET http://localhost:5000/api/admin/users/dashboard/:userId`
+
+**Example:** `GET /api/admin/users/dashboard/65f3a8b4c1d2e3f4a5b6c7d8`
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Dashboard data retrieved successfully",
+  "data": {
+    "userInfo": {
+      "id": "65f3a8b4c1d2e3f4a5b6c7d8",
+      "email": "user@example.com",
+      "username": "johndoe",
+      "country": "India",
+      "currency": "INR",
+      "currencySymbol": "₹",
+      "createdAt": "2025-10-01T10:00:00.000Z",
+      "updatedAt": "2025-10-08T19:00:00.000Z"
+    },
+    "gamificationStats": {
+      "level": 3,
+      "xp": 150,
+      "xpForNextLevel": 300,
+      "xpProgress": 50.0,
+      "totalCompletedChallenges": 5
+    },
+    "completedChallenges": [
+      {
+        "challengeId": "65f3a8b4c1d2e3f4a5b6c7d9",
+        "challengeName": "Complete Budget Tutorial",
+        "challengeDescription": "Learn how to create and manage your first budget",
+        "xpReward": 100,
+        "completedAt": "2025-10-07T19:35:00.000Z"
+      },
+      {
+        "challengeId": "65f3a8b4c1d2e3f4a5b6c7e0",
+        "challengeName": "Save First $100",
+        "challengeDescription": "Reach your first savings milestone",
+        "xpReward": 150,
+        "completedAt": "2025-10-07T20:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+**Response Fields Explained:**
+- **userInfo**: Complete user profile including currency information
+- **gamificationStats**: 
+  - `level`: Current user level
+  - `xp`: Total XP accumulated
+  - `xpForNextLevel`: XP required to reach next level
+  - `xpProgress`: Percentage progress towards next level (0-100)
+  - `totalCompletedChallenges`: Count of all completed challenges
+- **completedChallenges**: Array of all challenges user has completed with full details
+
+**Error Responses:**
+- **404:** User not found
+- **500:** Failed to fetch dashboard data
+
+**Use Cases:**
+- Display user profile on dashboard
+- Show gamification progress (level, XP bar)
+- List achievements and completed challenges
+- Currency-specific UI rendering
+
+---
+
 ## 🔐 Authentication Guide
 
 ### **How to Use Bearer Token Authentication**
@@ -641,7 +725,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZjNhOGI0Y
 
 ### **Scenario 1: Complete User Signup Flow**
 
-**Step 1:** Create a new user with country and currency
+**Step 1:** Create a new user with country, currency, and currencySymbol
 ```bash
 POST /api/user/auth/signup
 {
@@ -649,7 +733,8 @@ POST /api/user/auth/signup
   "username": "testuser",
   "password": "password123",
   "country": "United States",
-  "currency": "USD"
+  "currency": "USD",
+  "currencySymbol": "$"
 }
 ```
 
@@ -660,7 +745,8 @@ POST /api/user/auth/signup
   "token": "eyJhbGc...",
   "user": {
     "country": "United States",
-    "currency": "USD"
+    "currency": "USD",
+    "currencySymbol": "$"
   }
 }
 ```
@@ -780,12 +866,50 @@ GET /api/admin/challenges/{challengeId}
 
 ---
 
+### **Scenario 6: Dashboard Data Retrieval**
+
+**Step 1:** Get user's dashboard data
+```bash
+GET /api/admin/users/dashboard/{userId}
+```
+
+**Step 2:** Display user info
+```json
+{
+  "userInfo": {
+    "username": "johndoe",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹"
+  }
+}
+```
+
+**Step 3:** Show gamification stats
+```json
+{
+  "gamificationStats": {
+    "level": 3,
+    "xp": 150,
+    "xpForNextLevel": 300,
+    "xpProgress": 50.0
+  }
+}
+```
+
+**Step 4:** Render XP progress bar
+- Use `xpProgress` percentage (0-100)
+- Display `currencySymbol` for monetary values
+
+---
+
 ## ⚠️ Important Notes
 
-### **Currency Field:**
-- Must be a 3-letter ISO currency code
-- Automatically converted to uppercase
-- Examples: USD, EUR, GBP, INR, JPY
+### **Currency Fields:**
+- **currency**: Must be a 3-letter ISO currency code (USD, EUR, GBP, INR, JPY)
+- **currencySymbol**: Display symbol for UI ($, €, £, ₹, ¥)
+- Currency automatically converted to uppercase
+- Both required during signup
 
 ### **Challenge Completion:**
 - Users can only complete each challenge once
@@ -870,6 +994,11 @@ GET /api/admin/challenges/{challengeId}
 | POST | `http://localhost:5000/api/user/my-challenges/:id/complete` | Yes | Complete a challenge |
 | GET | `http://localhost:5000/api/user/my-challenges/me` | Yes | List user's completed challenges |
 
+### **User Dashboard**
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `http://localhost:5000/api/admin/users/dashboard/:userId` | No* | Get complete user dashboard data |
+
 *Note: Admin routes currently have no auth middleware but should be protected in production.
 
 ---
@@ -877,8 +1006,9 @@ GET /api/admin/challenges/{challengeId}
 ## 🎉 Success Criteria
 
 All features working correctly if:
-- ✅ Users can signup with country and currency
+- ✅ Users can signup with country, currency, and currencySymbol
 - ✅ Currency is validated and converted to uppercase
+- ✅ Currency symbol is stored for UI display
 - ✅ Actions can be created with XP rewards
 - ✅ Actions list displays correctly
 - ✅ Actions can be deleted
@@ -889,6 +1019,8 @@ All features working correctly if:
 - ✅ Users auto level-up when completing challenges
 - ✅ Completed challenges list shows full details
 - ✅ Multiple level-ups work in single completion
+- ✅ Dashboard API returns complete user data
+- ✅ XP progress percentage calculated correctly
 
 ---
 
@@ -912,7 +1044,8 @@ curl -X POST http://localhost:5000/api/user/auth/signup \
     "username": "testuser",
     "password": "password123",
     "country": "India",
-    "currency": "INR"
+    "currency": "INR",
+    "currencySymbol": "₹"
   }'
 ```
 
@@ -949,6 +1082,11 @@ curl -X GET http://localhost:5000/api/user/my-challenges/me \
   -H "Authorization: Bearer {your-token}"
 ```
 
+### **Get Dashboard Data**
+```bash
+curl -X GET http://localhost:5000/api/admin/users/dashboard/{userId}
+```
+
 ---
 
 ## 💡 Best Practices
@@ -976,16 +1114,20 @@ curl -X GET http://localhost:5000/api/user/my-challenges/me \
 ## 🎮 All Systems Ready!
 
 Your gamified budgeting app now has:
-- ✅ Multi-currency user support
+- ✅ Multi-currency user support with currency symbols
 - ✅ Actions system with XP rewards
 - ✅ Complete challenges system
 - ✅ Automatic XP and level-up on challenge completion
+- ✅ Dashboard API with complete user data
+- ✅ XP progress tracking and statistics
 - ✅ Comprehensive API documentation
 
 **Next Steps:**
 1. Test all endpoints using Postman
 2. Integrate with your frontend
-3. Add admin authentication middleware
-4. Implement role-based access control
+3. Use currencySymbol for displaying monetary values in UI
+4. Implement XP progress bars using xpProgress percentage
+5. Add admin authentication middleware
+6. Implement role-based access control
 
 Happy coding! 🚀✨
