@@ -25,27 +25,55 @@ export const listLevels = async (req, res) => {
 
 /**
  * POST /api/levels
- * Body: { level: Number, xpRequired: Number, syncExisting: Boolean (optional default true) }
+ * Body: { level: Number, levelName: String, xpRequired: Number, levelReward: String (optional), levelBadge: String, syncExisting: Boolean (optional default true) }
  * Creates or updates a level config (upsert). Automatically syncs existing users' xpForNextLevel.
  */
 export const upsertLevel = async (req, res) => {
   try {
-    const { level, xpRequired, syncExisting = true } = req.body;
+    const { level, levelName, xpRequired, levelReward, levelBadge, syncExisting = true } = req.body;
 
+    // Validate level
     if (!Number.isInteger(level) || level < 1) {
       return res
         .status(400)
         .json({ success: false, message: "level must be an integer >= 1" });
     }
+
+    // Validate levelName
+    if (!levelName || typeof levelName !== "string" || !levelName.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "levelName is required and must be a non-empty string" });
+    }
+
+    // Validate xpRequired
     if (!Number.isFinite(xpRequired) || xpRequired < 1) {
       return res
         .status(400)
         .json({ success: false, message: "xpRequired must be a number >= 1" });
     }
 
+    // Validate levelBadge
+    if (!levelBadge || typeof levelBadge !== "string" || !levelBadge.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "levelBadge is required and must be a non-empty string" });
+    }
+
+    const updateData = {
+      levelName: levelName.trim(),
+      xpRequired,
+      levelBadge: levelBadge.trim(),
+    };
+
+    // levelReward is optional
+    if (levelReward !== undefined && levelReward !== null) {
+      updateData.levelReward = String(levelReward).trim();
+    }
+
     const levelConfig = await LevelConfig.findOneAndUpdate(
       { level },
-      { xpRequired },
+      updateData,
       { upsert: true, new: true, runValidators: true }
     );
 

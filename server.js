@@ -38,9 +38,7 @@ app.use(express.json());
     app.use("/api/user/budget", budgetRoutes);
     app.use("/api/user/expense", expenseRoutes);
     app.use("/api/user/goals", goalsRoutes);
-
-
-
+    app.use("/api/user", userRoutes);  // User profile routes (must come AFTER specific routes)
 
     //admin
     app.use("/api/admin/settings", settingsRoutes);
