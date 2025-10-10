@@ -1,9 +1,12 @@
 // routes/user.routes.js
 import express from "express";
-import { addXp, listUsers, getUserById, getUserDashboardData } from "../controllers/user.controller.js";
+import { addXp, listUsers, getUserById, getUserDashboardData, updateProfile } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
+
+// User profile routes (authenticated)
+router.put("/profile", authMiddleware, updateProfile);  // Update user profile
 
 // Admin routes for user management
 router.get("/", listUsers);                    // List all users

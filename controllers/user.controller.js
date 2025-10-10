@@ -174,3 +174,116 @@ export const getUserDashboardData = async (req, res) => {
     });
   }
 };
+
+/**
+ * PUT /api/user/profile
+ * Update user profile (username and email)
+ * Body: { username?, email? }
+ */
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    const { username, email } = req.body;
+
+    // Check if at least one field is provided
+    if (!username && !email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide at least one field to update (username or email)"
+      });
+    }
+
+    // Find current user
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Validate and check for duplicates
+    const updates = {};
+
+    if (username) {
+      // Validate username
+      if (typeof username !== "string" || username.trim().length < 3) {
+        return res.status(400).json({
+          success: false,
+          message: "Username must be at least 3 characters long"
+        });
+      }
+
+      // Check if username is already taken (by another user)
+      if (username.trim() !== currentUser.username) {
+        const existingUsername = await User.findOne({ username: username.trim() });
+        if (existingUsername) {
+          return res.status(409).json({
+            success: false,
+            message: "Username already taken"
+          });
+        }
+        updates.username = username.trim();
+      }
+    }
+
+    if (email) {
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format"
+        });
+      }
+
+      // Check if email is already taken (by another user)
+      if (email.toLowerCase() !== currentUser.email.toLowerCase()) {
+        const existingEmail = await User.findOne({ email: email.toLowerCase() });
+        if (existingEmail) {
+          return res.status(409).json({
+            success: false,
+            message: "Email already registered"
+          });
+        }
+        updates.email = email.toLowerCase();
+      }
+    }
+
+    // Check if there are any actual changes
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No changes detected. Username and email are the same as current values."
+      });
+    }
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updates,
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully. You can now login with your new credentials.",
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        country: updatedUser.country,
+        currency: updatedUser.currency,
+        currencySymbol: updatedUser.currencySymbol,
+        level: updatedUser.level,
+        xp: updatedUser.xp
+      }
+    });
+  } catch (err) {
+    console.error("updateProfile error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update profile",
+      error: err.message
+    });
+  }
+};
