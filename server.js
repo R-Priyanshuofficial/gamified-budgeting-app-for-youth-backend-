@@ -13,6 +13,7 @@ import userChallengeRoutes from "./routes/userChallenge.routes.js";
 import budgetRoutes from "./routes/budget.routes.js";
 import expenseRoutes from "./routes/expense.routes.js";
 import goalsRoutes from "./routes/goals.routes.js";
+import leaderboardRoutes from "./routes/leaderboard.routes.js";
 
 
 
@@ -32,19 +33,18 @@ app.use(cors());  // allow all origins (for dev)
 app.use(express.json());
 
 //Routes
-    //user
     app.use("/api/user/auth", authRoutes);
     app.use("/api/user/my-challenges", userChallengeRoutes); // or whatever path you prefer
     app.use("/api/user/budget", budgetRoutes);
     app.use("/api/user/expense", expenseRoutes);
     app.use("/api/user/goals", goalsRoutes);
-    app.use("/api/user", userRoutes);  // User profile routes (must come AFTER specific routes)
+    app.use("/api/user/leaderboard", leaderboardRoutes); // Leaderboard routes
+    app.use("/api/user", userRoutes); // User profile routes (must come AFTER specific routes)
 
     //admin
     app.use("/api/admin/settings", settingsRoutes);
     app.use("/api/admin/levels", levelConfigRoutes);
     app.use("/api/admin/users", userRoutes);
-    app.use("/api/admin", adminRoutes);
     app.use("/api/admin/actions", actionRoutes);
     app.use("/api/admin/challenges", challengeRoutes);
 

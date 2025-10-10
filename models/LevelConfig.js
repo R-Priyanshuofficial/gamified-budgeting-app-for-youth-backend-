@@ -31,4 +31,5 @@ const LevelConfigSchema = new mongoose.Schema({
 
 LevelConfigSchema.index({level : 1}, { unique: true });
 
-const LevelConfig = mongoose.model("LevelConfig" , LevelConfigSchema)
+const LevelConfig = mongoose.model("LevelConfig" , LevelConfigSchema);
+export default LevelConfig;
