@@ -12,6 +12,8 @@ import challengeRoutes from "./routes/challenge.routes.js";
 import userChallengeRoutes from "./routes/userChallenge.routes.js";
 import budgetRoutes from "./routes/budget.routes.js";
 import expenseRoutes from "./routes/expense.routes.js";
+import goalsRoutes from "./routes/goals.routes.js";
+
 
 
 
@@ -35,6 +37,9 @@ app.use(express.json());
     app.use("/api/user/my-challenges", userChallengeRoutes); // or whatever path you prefer
     app.use("/api/user/budget", budgetRoutes);
     app.use("/api/user/expense", expenseRoutes);
+    app.use("/api/user/goals", goalsRoutes);
+
+
 
 
     //admin
