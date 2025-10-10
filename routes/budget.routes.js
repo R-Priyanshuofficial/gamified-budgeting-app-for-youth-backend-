@@ -3,6 +3,7 @@ import express from "express";
 import {
   createBudget,
   getBudgets,
+  getActiveBudgets,
   getBudgetById,
   addSpentToBudget,
   getBudgetSummary,
@@ -17,6 +18,9 @@ router.post("/", authMiddleware, createBudget);
 
 // Get all budgets for logged-in user
 router.get("/", authMiddleware, getBudgets);
+
+// Get only active budgets (current date between startDate and endDate)
+router.get("/active", authMiddleware, getActiveBudgets);
 
 // Get budget summary (yearly vs monthly allocation)
 router.get("/summary", authMiddleware, getBudgetSummary);

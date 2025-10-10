@@ -196,6 +196,39 @@ export const getBudgets = async (req, res) => {
 };
 
 /**
+ * Get only active budgets for the authenticated user.
+ * Active means current date is between startDate and endDate.
+ * Returns only budgets that are currently ongoing.
+ */
+export const getActiveBudgets = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    const now = new Date();
+    
+    // Find budgets where current date is between startDate and endDate
+    const activeBudgets = await Budget.find({
+      user: userId,
+      startDate: { $lte: now },
+      endDate: { $gte: now }
+    }).sort({ createdAt: -1 }).lean();
+
+    const totalSavingsDoc = await TotalSavings.findOne({ user: userId });
+    
+    return res.json({ 
+      success: true, 
+      count: activeBudgets.length,
+      budgets: activeBudgets, 
+      totalSavings: totalSavingsDoc?.totalSaved || 0 
+    });
+  } catch (err) {
+    console.error("getActiveBudgets error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
  * Get a single budget by id (only if owner).
  */
 export const getBudgetById = async (req, res) => {

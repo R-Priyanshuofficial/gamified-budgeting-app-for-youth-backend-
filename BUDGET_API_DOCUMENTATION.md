@@ -329,7 +329,80 @@ Authorization: Bearer YOUR_JWT_TOKEN
 
 ---
 
-### 10. Get Single Budget by ID
+### 10. Get Active Budgets Only
+
+**Endpoint:** `GET /api/user/budget/active`
+
+**Description:** Fetches only budgets that are currently active. A budget is considered "active" when the current date falls between its `startDate` and `endDate`.
+
+**Headers:**
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "count": 2,
+  "budgets": [
+    {
+      "_id": "671d7b9c4e3f5g6h7i8j9012",
+      "username": "johndoe",
+      "title": "January 2025 Budget",
+      "budgetType": "overall",
+      "budgetAmount": 10000,
+      "spent": 2000,
+      "savings": 8000,
+      "startDate": "2025-01-01T00:00:00.000Z",
+      "endDate": "2025-01-31T00:00:00.000Z",
+      "budgetDuration": "monthly"
+    },
+    {
+      "_id": "671d8c0d5f4g6h7i8j9k0123",
+      "username": "johndoe",
+      "title": "2025 Grocery Budget",
+      "budgetType": "category",
+      "categoryName": "groceries",
+      "budgetAmount": 60000,
+      "spent": 5000,
+      "savings": 55000,
+      "startDate": "2025-01-01T00:00:00.000Z",
+      "endDate": "2025-12-31T00:00:00.000Z",
+      "budgetDuration": "yearly"
+    }
+  ],
+  "totalSavings": 130000
+}
+```
+
+**Use Cases:**
+- Display current budgets in dashboard
+- Show only relevant budgets to users
+- Filter out expired or future budgets
+- Track active spending limits
+
+**Example Scenarios:**
+
+**Scenario 1:** Today is January 15, 2025
+- ✅ Returns: January 2025 budget (1st - 31st)
+- ✅ Returns: 2025 yearly budget (Jan 1 - Dec 31)
+- ❌ Excludes: February 2025 budget (future)
+- ❌ Excludes: December 2024 budget (expired)
+
+**Scenario 2:** User has no active budgets
+```json
+{
+  "success": true,
+  "count": 0,
+  "budgets": [],
+  "totalSavings": 0
+}
+```
+
+---
+
+### 11. Get Single Budget by ID
 
 **Endpoint:** `GET /api/user/budget/{budget_id}`
 
