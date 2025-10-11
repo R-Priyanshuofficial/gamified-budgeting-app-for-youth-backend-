@@ -14,6 +14,7 @@ import budgetRoutes from "./routes/budget.routes.js";
 import expenseRoutes from "./routes/expense.routes.js";
 import goalsRoutes from "./routes/goals.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
+import chatbotRoutes from "./routes/chatbot.routes.js";
 
 
 
@@ -24,6 +25,13 @@ import leaderboardRoutes from "./routes/leaderboard.routes.js";
 
 
 dotenv.config();
+
+// Debug: Check if GEMINI_API_KEY is loaded
+console.log('🔑 GEMINI_API_KEY loaded:', process.env.GEMINI_API_KEY ? 'YES ✅' : 'NO ❌');
+if (process.env.GEMINI_API_KEY) {
+  console.log('🔑 API Key length:', process.env.GEMINI_API_KEY.length);
+  console.log('🔑 API Key (trimmed):', process.env.GEMINI_API_KEY.trim().substring(0, 20) + '...');
+}
 
 const app = express();
 app.use(cors());  // allow all origins (for dev)
@@ -39,23 +47,22 @@ app.use(express.json());
     app.use("/api/user/expense", expenseRoutes);
     app.use("/api/user/goals", goalsRoutes);
     app.use("/api/user/leaderboard", leaderboardRoutes); // Leaderboard routes
+    app.use("/api/chatbot", chatbotRoutes); // AI Chatbot routes
     app.use("/api/user", userRoutes); // User profile routes (must come AFTER specific routes)
 
     //admin
     app.use("/api/admin/settings", settingsRoutes);
     app.use("/api/admin/levels", levelConfigRoutes);
     app.use("/api/admin/users", userRoutes);
+    app.use("/api/admin", adminRoutes);
     app.use("/api/admin/actions", actionRoutes);
     app.use("/api/admin/challenges", challengeRoutes);
 
-
-
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
-
 // Base route
 app.get("/", (req, res) => res.send("API is running..."));
 
