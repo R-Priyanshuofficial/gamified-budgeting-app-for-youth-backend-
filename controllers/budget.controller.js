@@ -172,8 +172,28 @@ export const createBudget = async (req, res) => {
         message: "A budget with these details already exists.",
       });
     }
+
+    // Handle validation errors
+    if (err.name === "ValidationError") {
+      const messages = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(", "),
+      });
+    }
+
+    // Handle cast errors (invalid ObjectId, etc.)
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data format provided.",
+      });
+    }
     
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: "Failed to create budget. Please try again later." 
+    });
   }
 };
 
@@ -191,7 +211,10 @@ export const getBudgets = async (req, res) => {
     return res.json({ success: true, budgets, totalSavings: totalSavingsDoc?.totalSaved || 0 });
   } catch (err) {
     console.error("getBudgets error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: "Failed to fetch budgets. Please try again later." 
+    });
   }
 };
 
@@ -224,7 +247,10 @@ export const getActiveBudgets = async (req, res) => {
     });
   } catch (err) {
     console.error("getActiveBudgets error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: "Failed to fetch active budgets. Please try again later." 
+    });
   }
 };
 
@@ -247,7 +273,10 @@ export const getBudgetById = async (req, res) => {
     return res.json({ success: true, budget });
   } catch (err) {
     console.error("getBudgetById error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: "Failed to fetch budget details. Please try again later." 
+    });
   }
 };
 
@@ -295,7 +324,10 @@ export const addSpentToBudget = async (req, res) => {
     return res.json({ success: true, budget: updated, totalSavings: totalSavings.totalSaved });
   } catch (err) {
     console.error("addSpentToBudget error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: "Failed to update spending. Please try again later." 
+    });
   }
 };
 
@@ -363,6 +395,9 @@ export const getBudgetSummary = async (req, res) => {
     return res.json({ success: true, summary });
   } catch (err) {
     console.error("getBudgetSummary error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: "Failed to fetch budget summary. Please try again later." 
+    });
   }
 };
